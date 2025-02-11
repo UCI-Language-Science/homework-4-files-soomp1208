@@ -1,0 +1,9 @@
+{
+    "workbench.colorTheme": "Default Dark Modern",
+    "files.exclude": {
+        ".devcontainer": true,
+        ".github": true,
+        ".gitignore": true,
+        ".vscode": true
+    },
+}
