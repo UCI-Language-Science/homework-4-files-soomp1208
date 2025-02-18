@@ -34,10 +34,43 @@
 from math import log, inf
 
 
-#######################
-# YOUR CODE GOES HERE #
-#######################
-
+import csv
+from pathlib import Path
+def train_unigram_model(training_data):
+    word_counts = {}
+    for file_path in Path(training_data).glob('*.txt'):
+        with open(file_path, 'r') as file:
+            for line in file:
+                words = line.strip().split()
+                for word in words:
+                    word = word.lower()
+                    word_counts[word] = word_counts.get(word,0)+1
+                    total_words = sum(word_counts.values())
+                    unigram_model = {}
+                    for word, count in word_counts.items():
+                        unigram_model[word] = count/total_words
+    return unigram_model
+def score_sentence (unigram_model, sentence):
+    words = sentence.strip().split()
+    log_prob = 0
+    for word in words:
+        word = word.lower()
+        probability = unigram_model.get(word,0)
+        if probability == 0:
+            return -inf
+        log_prob += log(probability)
+    return log_prob
+def score_unigrams (training_data, sentence_test, output_csv):
+    unigram_model = train_unigram_model(training_data)
+    results = []
+    with open(sentence_test, 'r') as file:
+        for line in file:
+            log_prob = score_sentence(unigram_model, line)
+            results.append((line.strip(), log_prob))
+    with open(output_csv, 'w', newline='') as csvfile:
+        writer = csv.writer(csvfile)
+        writer.writerow(["sentence", "unigram_prob"])
+        writer.writerows(results)
 
 
 # Do not modify the following line
