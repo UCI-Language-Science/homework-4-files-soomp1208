@@ -34,10 +34,46 @@
 from math import log, inf
 
 
-#######################
-# YOUR CODE GOES HERE #
-#######################
-
+import csv
+from pathlib import Path
+def train_unigram_model(training_data):
+    word_counts = {}
+    total_words = 0
+    for file_path in Path(training_data).glob('*.txt'):
+        with open(file_path, 'r') as file:
+            for line in file:
+                words = line.strip().split()
+                for word in words:
+                    word = word.lower()
+                    word_counts[word] = word_counts.get(word,0)+1
+                    total_words = sum(word_counts.values())
+    unigram_model = {}
+    for word, count in word_counts.items():
+        unigram_model[word] = count/total_words
+    return unigram_model
+def score_sentence (unigram_model, sentence):
+    words = sentence.strip().split()
+    log_prob = 0
+    for word in words:
+        word = word.lower()
+        probability = unigram_model.get(word,0)
+        if probability == 0:
+            return -inf
+        log_prob += log(probability)
+    return log_prob
+def score_unigrams (training_data, test_data, output_csv):
+    unigram_model = train_unigram_model(training_data)
+    test_data = str(Path('test_data', 'test_sentences.txt'))
+    output_csv = Path("output.csv")
+    results = []
+    with open("test_data/test_sentences.txt") as file:
+        for sentence in file:
+            log_prob = score_sentence(unigram_model, sentence)
+            results.append({"sentence": sentence.strip(), "unigram_prob": log_prob})
+    with open("output.csv", 'w', newline='') as file:
+        writer = csv.DictWriter(file, fieldnames=["sentence", "unigram_prob"])
+        writer.writeheader()
+        writer.writerows(results)
 
 
 # Do not modify the following line
